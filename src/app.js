@@ -2,6 +2,7 @@ const express = require('express')
 const cors = require('cors')
 
 const userRouter = require('./routes/user.route')
+const gameRouter = require('./routes/game.route')
 
 const app = express()
 
@@ -11,6 +12,7 @@ app.use(express.json())
 
 // Routes
 app.use('/api/users', userRouter)
+app.use('/api/games', gameRouter)
 
 // Route kiểm tra server
 app.get('/api/health', (req, res) => {
