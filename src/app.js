@@ -7,8 +7,10 @@ const gameRouter = require('./routes/game.route')
 const app = express()
 
 // Middlewares chung
-app.use(cors())
-app.use(express.json())
+app.use(cors({
+  origin: 'http://localhost:3000', // Port Next.js của bạn
+  credentials: true
+}));app.use(express.json())
 
 // Routes
 app.use('/api/users', userRouter)

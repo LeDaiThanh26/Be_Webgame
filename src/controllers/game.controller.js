@@ -20,10 +20,10 @@ exports.getAllGames = async (req, res) => {
   }
 }
 
-// READ ONE - Lấy game theo ID
-exports.getGameById = async (req, res) => {
+// READ ONE - Lấy game theo slug
+exports.getGameBySlug = async (req, res) => {
   try {
-    const game = await Game.findById(req.params.id)
+    const game = await Game.findOne({ slug: req.params.slug })
     if (!game) {
       return res.status(404).json({ message: 'Game not found' })
     }
