@@ -4,6 +4,7 @@ const cors = require('cors')
 const userRouter = require('./routes/user.route')
 const gameRouter = require('./routes/game.route')
 const favouriteRouter = require('./routes/favourite.route')
+const commentRouter = require('./routes/comment.route')
 
 const app = express()
 
@@ -18,6 +19,7 @@ app.use(express.json())
 app.use('/api/users', userRouter)
 app.use('/api/games', gameRouter)
 app.use('/api/favourites', favouriteRouter)
+app.use('/api/comments', commentRouter)
 
 // Route kiểm tra server
 app.get('/api/health', (req, res) => {
