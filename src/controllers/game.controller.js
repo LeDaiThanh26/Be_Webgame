@@ -41,11 +41,15 @@ exports.getRandom12Games = async (req, res) => {
 }
 
 // READ ONE - Lấy game theo slug
-exports.getGameBySlug = async (req, res) => {
+// READ ONE - Lấy game theo slug
+exports.getGameBySlug = async (req, res, next) => {
   try {
+    // Thử tìm game theo slug
     const game = await Game.findOne({ slug: req.params.slug })
     if (!game) {
-      return res.status(404).json({ message: 'Game not found' })
+      // Nếu không tìm thấy game -> Có thể là request lấy theo Category?
+      // Chuyển sang middleware tiếp theo (getGamesByCategory)
+      return next()
     }
     res.json({ data: game })
   } catch (error) {
@@ -55,13 +59,13 @@ exports.getGameBySlug = async (req, res) => {
 // READ  - Lấy game theo danh mục
 exports.getGamesByCategory = async (req, res) => {
   try {
-    const urlCategory = req.params.category; 
-    let categoryName = urlCategory.replace(/-/g, ' '); 
+    const urlCategory = req.params.category;
+    let categoryName = urlCategory.replace(/-/g, ' ');
     categoryName = categoryName.split(' ')
-    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(' ');
-    const games = await Game.find({ category: categoryName }); 
-    
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    const games = await Game.find({ category: categoryName });
+
 
     if (games.length === 0) {
       return res.status(404).json({ message: `No games found in category: ${categoryName}` });
@@ -73,10 +77,11 @@ exports.getGamesByCategory = async (req, res) => {
   }
 };
 // UPDATE - Cập nhật game
+// UPDATE - Cập nhật game theo slug
 exports.updateGame = async (req, res) => {
   try {
-    const game = await Game.findByIdAndUpdate(
-      req.params.id,
+    const game = await Game.findOneAndUpdate(
+      { slug: req.params.slug },
       { ...req.body, last_update: Date.now() },
       { new: true, runValidators: true }
     )
@@ -90,9 +95,10 @@ exports.updateGame = async (req, res) => {
 }
 
 // DELETE - Xóa game
+// DELETE - Xóa game theo slug
 exports.deleteGame = async (req, res) => {
   try {
-    const game = await Game.findByIdAndDelete(req.params.id)
+    const game = await Game.findOneAndDelete({ slug: req.params.slug })
     if (!game) {
       return res.status(404).json({ message: 'Game not found' })
     }
