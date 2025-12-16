@@ -18,10 +18,9 @@ const gameSchema = new mongoose.Schema({
   video: String
 }, { timestamps: true })
 
-gameSchema.pre('save', function(next) {
+gameSchema.pre('save', async function() {
   if (this.name) {
     this.slug = slugify(this.name, { lower: true, strict: true })
   }
-  next()
 })
 module.exports = mongoose.model('Game', gameSchema)
