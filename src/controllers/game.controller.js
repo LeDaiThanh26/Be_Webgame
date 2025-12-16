@@ -42,7 +42,26 @@ exports.getGameBySlug = async (req, res) => {
     res.status(500).json({ message: 'Error fetching game', error: error.message })
   }
 }
+// READ  - Lấy game theo danh mục
+exports.getGamesByCategory = async (req, res) => {
+  try {
+    const urlCategory = req.params.category; 
+    let categoryName = urlCategory.replace(/-/g, ' '); 
+    categoryName = categoryName.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+    const games = await Game.find({ category: categoryName }); 
+    
 
+    if (games.length === 0) {
+      return res.status(404).json({ message: `No games found in category: ${categoryName}` });
+    }
+
+    res.json({ data: games });
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching games', error: error.message });
+  }
+};
 // UPDATE - Cập nhật game
 exports.updateGame = async (req, res) => {
   try {
