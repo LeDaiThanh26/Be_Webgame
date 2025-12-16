@@ -1,5 +1,5 @@
 const Game = require('../models/Game.model')
-
+const getMockCategoryInfo = require('../helper/getMockCategoryInfo')
 // CREATE - Tạo game mới
 exports.createGame = async (req, res) => {
   try {
@@ -70,6 +70,55 @@ exports.getGamesByCategory = async (req, res) => {
     res.json({ data: games });
   } catch (error) {
     res.status(500).json({ message: 'Error fetching games', error: error.message });
+  }
+};
+exports.getAllCategoriesWithGames = async (req, res) => {
+  try {
+    // 1. Truy vấn TẤT CẢ trò chơi
+    const allGames = await Game.find().select('name category thumbnail video link_game slug').lean(); 
+
+    if (allGames.length === 0) {
+      return res.status(404).json({ message: 'No games found in the database.' });
+    }
+
+    // 2. NHÓM TRÒ CHƠI THEO DANH MỤC
+    const groupedByCategory = allGames.reduce((acc, game) => {
+      const categoryName = game.category;
+      
+      const gameData = {
+        id: game._id ? game._id.toString() : game.name.replace(/\s/g, '-').toLowerCase(),
+        image: game.thumbnail,
+        video: game.video,
+        title: game.name,
+        slug: game.slug, 
+      };
+
+      if (!acc[categoryName]) {
+        acc[categoryName] = [];
+      }
+      acc[categoryName].push(gameData);
+      return acc;
+    }, {});
+    
+    // 3. ÁNH XẠ SANG CẤU TRÚC JSON
+    const finalResult = Object.keys(groupedByCategory).map(categoryName => {
+      const categorySlug = categoryName.toLowerCase().replace(/\s/g, '-');
+      const mockCategoryInfo = getMockCategoryInfo(categorySlug, categoryName);
+
+      return {
+        id: categorySlug,
+        image: mockCategoryInfo.image,
+        title: categoryName,
+        color: mockCategoryInfo.color,
+        games: groupedByCategory[categoryName].slice(0, 6) // ✅ CHỈ LẤY 6 GAMES ĐẦU TIÊN
+      };
+    });
+
+    // 4. TRẢ VỀ KẾT QUẢ - Wrap trong object data
+    res.json({ data: finalResult });
+
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching categories and games', error: error.message });
   }
 };
 // UPDATE - Cập nhật game
