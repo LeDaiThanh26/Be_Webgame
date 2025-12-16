@@ -30,6 +30,16 @@ exports.getRandomGames = async (req, res) => {
   }
 }
 
+// READ RANDOM 12 - Lấy 12 game ngẫu nhiên
+exports.getRandom12Games = async (req, res) => {
+  try {
+    const games = await Game.aggregate([{ $sample: { size: 12 } }])
+    res.json({ data: games })
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching random games', error: error.message })
+  }
+}
+
 // READ ONE - Lấy game theo slug
 exports.getGameBySlug = async (req, res) => {
   try {
