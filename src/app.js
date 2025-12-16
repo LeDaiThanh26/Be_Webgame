@@ -3,6 +3,7 @@ const cors = require('cors')
 
 const userRouter = require('./routes/user.route')
 const gameRouter = require('./routes/game.route')
+const favouriteRouter = require('./routes/favourite.route')
 
 const app = express()
 
@@ -10,11 +11,13 @@ const app = express()
 app.use(cors({
   origin: 'http://localhost:3000', // Port Next.js của bạn
   credentials: true
-}));app.use(express.json())
+}))
+app.use(express.json())
 
 // Routes
 app.use('/api/users', userRouter)
 app.use('/api/games', gameRouter)
+app.use('/api/favourites', favouriteRouter)
 
 // Route kiểm tra server
 app.get('/api/health', (req, res) => {
