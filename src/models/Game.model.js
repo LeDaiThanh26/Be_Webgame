@@ -10,6 +10,7 @@ const gameSchema = new mongoose.Schema({
   category: String,
   thumbnail: String,
   description: String,
+  how_to_play: String,
   image: [String],
   link_game: String
 }, { timestamps: true })
