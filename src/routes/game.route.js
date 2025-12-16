@@ -3,6 +3,7 @@ const controller = require('../controllers/game.controller')
 
 router.post('/', controller.createGame)
 router.get('/random', controller.getRandomGames)
+router.get('/random-12', controller.getRandom12Games)
 router.get('/', controller.getAllGames)
 router.get('/:category',controller.getGamesByCategory)
 router.get('/:slug', controller.getGameBySlug)
