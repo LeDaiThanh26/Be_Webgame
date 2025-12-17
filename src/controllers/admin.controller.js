@@ -38,3 +38,17 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: 'Lỗi server', error: error.message })
     }
 }
+
+// GET ADMIN INFO
+exports.getMe = async (req, res) => {
+    try {
+        const admin = await Admin.findById(req.adminId).select('-password')
+        if (!admin) {
+            return res.status(404).json({ message: 'Không tìm thấy admin' })
+        }
+        res.json(admin)
+    } catch (error) {
+        console.error(error)
+        res.status(500).json({ message: 'Lỗi server', error: error.message })
+    }
+}
