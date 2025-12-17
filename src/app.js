@@ -5,6 +5,7 @@ const userRouter = require('./routes/user.route')
 const gameRouter = require('./routes/game.route')
 const favouriteRouter = require('./routes/favourite.route')
 const commentRouter = require('./routes/comment.route')
+const recentRouter = require('./routes/recent.route')
 const adminRouter = require('./routes/admin.route')
 
 const app = express()
@@ -21,6 +22,7 @@ app.use('/api/users', userRouter)
 app.use('/api/games', gameRouter)
 app.use('/api/favourites', favouriteRouter)
 app.use('/api/comments', commentRouter)
+app.use('/api/recents', recentRouter)
 app.use('/api/admin', adminRouter)
 
 // Route kiểm tra server
