@@ -19,15 +19,6 @@ exports.addRecent = async (req, res) => {
 
         // 2. Kiểm tra số lượng game recent hiện tại
         const count = await Recent.countDocuments({ id_user: userId })
-
-        // 3. Nếu đã đủ 16 game, xóa game cũ nhất
-        if (count >= 16) {
-            const oldest = await Recent.findOne({ id_user: userId }).sort({ createdAt: 1 })
-            if (oldest) {
-                await Recent.findByIdAndDelete(oldest._id)
-            }
-        }
-
         // 4. Thêm record mới
         const newRecent = new Recent({
             id_user: userId,
