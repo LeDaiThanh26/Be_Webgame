@@ -12,9 +12,10 @@ const app = express()
 
 // Middlewares chung
 app.use(cors({
-  origin: 'http://localhost:3000', // Port Next.js của bạn
+  origin: process.env.CLIENT_URL,
   credentials: true
-}))
+}));
+// app.use(cors())
 app.use(express.json())
 
 // Routes
