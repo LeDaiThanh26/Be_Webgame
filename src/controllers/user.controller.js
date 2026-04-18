@@ -1,20 +1,44 @@
 const User = require('../models/User.model')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
+const { broadcastLeaderboard } = require('../sockets/leaderboard.socket')
+const fetchAnimeAvatar = require('../helper/fetchAnimeAvatar')
 
 // REGISTER
 exports.register = async (req, res) => {
-  const { name, email, password } = req.body
+  try {
+    const { name, email, password } = req.body
 
-  const hashedPassword = await bcrypt.hash(password, 10)
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Vui lòng điền đầy đủ thông tin' })
+    }
 
-  const user = await User.create({
-    name,
-    email,
-    password: hashedPassword
-  })
+    const existingUser = await User.findOne({ email })
+    if (existingUser) {
+      return res.status(409).json({ message: 'Email đã tồn tại' })
+    }
 
-  res.status(201).json({ message: 'Register success' })
+    const hashedPassword = await bcrypt.hash(password, 10)
+
+    const avatar = await fetchAnimeAvatar()
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      avatar
+    })
+
+    res.status(201).json({ message: 'Đăng ký thành công' })
+
+  } catch (error) {
+    if (error.code === 11000) {
+      return res.status(409).json({ message: 'Email đã tồn tại' })
+    }
+
+    res.status(500).json({ message: 'Internal server error' })
+  }
+
 }
 
 // LOGIN
@@ -37,14 +61,18 @@ exports.login = async (req, res) => {
 }
 //Controller lấy user từ token
 exports.getMe = async (req, res) => {
-  const user = await User.findById(req.userId).select('-password')
-  res.json(user)
+  try {
+    const user = await User.findById(req.userId).select('-password')
+    res.json(user)
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching user', error: error.message })
+  }
 }
 
 //lay tat ca user
 exports.getAllUsers = async (req, res) => {
   try {
-    const users = await User.find().select('-[password')
+    const users = await User.find().select('-password')
     res.json(users)
   } catch (error) {
     res.status(500).json({ message: 'Error fetching users', error: error.message })
@@ -60,14 +88,6 @@ exports.addPoints = async (req, res) => {
     if (!userId) {
       return res.status(400).json({ message: 'User ID is required' })
     }
-
-    // Chưa đủ 60s → không cộng gì
-    // if (!playSeconds || playSeconds < 60) {
-    //   return res.json({
-    //     success: true,
-    //     xpAdded: 0
-    //   })
-    // }
 
     const user = await User.findById(userId)
     if (!user) {
@@ -90,6 +110,9 @@ exports.addPoints = async (req, res) => {
     user.playTime += playSeconds
 
     await user.save()
+
+    // Broadcast realtime leaderboard update tới tất cả WS clients
+    broadcastLeaderboard().catch((err) => console.error('[WS] broadcast failed:', err.message))
 
     res.json({
       success: true,
